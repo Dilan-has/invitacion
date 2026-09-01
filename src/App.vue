@@ -66,82 +66,75 @@ const isLocationModalOpen = ref(false)
 const isPlayingAudio = ref(false)
 const isAudioLoaded = ref(true)
 
-let audioCtx = null
-let isSynthPlaying = false
-let synthInterval = null
+let bgAudio = null
 
-// Romantic Acoustic Web Audio Synthesizer Loop (Soft romantic piano chords)
-const startSynthMusic = () => {
-  try {
-    if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)()
-    }
-    if (audioCtx.state === 'suspended') {
-      audioCtx.resume()
-    }
-
-    isSynthPlaying = true
-    isPlayingAudio.value = true
-
-    // Chord sequence: Cmaj7 -> Am7 -> Fmaj7 -> G7
-    const chords = [
-      [261.63, 329.63, 392.00, 493.88], // Cmaj7
-      [220.00, 261.63, 329.63, 392.00], // Am7
-      [174.61, 220.00, 261.63, 329.63], // Fmaj7
-      [196.00, 246.94, 293.66, 349.23]  // G7
-    ]
-
-    let chordIdx = 0
-
-    const playChord = () => {
-      if (!isSynthPlaying || !audioCtx) return
-      const now = audioCtx.currentTime
-      const currentChord = chords[chordIdx]
-
-      currentChord.forEach((freq, i) => {
-        const osc = audioCtx.createOscillator()
-        const gain = audioCtx.createGain()
-
-        osc.type = i % 2 === 0 ? 'sine' : 'triangle'
-        osc.frequency.setValueAtTime(freq, now + i * 0.15)
-
-        gain.gain.setValueAtTime(0.001, now + i * 0.15)
-        gain.gain.linearRampToValueAtTime(0.04, now + i * 0.15 + 0.4)
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.15 + 3.2)
-
-        osc.connect(gain)
-        gain.connect(audioCtx.destination)
-
-        osc.start(now + i * 0.15)
-        osc.stop(now + i * 0.15 + 3.5)
-      })
-
-      chordIdx = (chordIdx + 1) % chords.length
-    }
-
-    playChord()
-    synthInterval = setInterval(playChord, 3500)
-  } catch (e) {
-    console.warn('Audio play exception:', e)
+const initAudio = () => {
+  if (!bgAudio) {
+    bgAudio = new Audio('/images/music/song.mp3')
+    bgAudio.loop = true
+    bgAudio.volume = 0.6
   }
 }
 
-const stopSynthMusic = () => {
-  isSynthPlaying = false
-  isPlayingAudio.value = false
-  if (synthInterval) clearInterval(synthInterval)
+const playMusic = () => {
+  initAudio()
+  if (bgAudio) {
+    bgAudio.play().then(() => {
+      isPlayingAudio.value = true
+    }).catch(err => {
+      console.warn('Autoplay prevented by browser policy, waiting for user gesture:', err)
+      isPlayingAudio.value = false
+    })
+  }
 }
 
 const toggleAudio = () => {
+  initAudio()
   if (isPlayingAudio.value) {
-    stopSynthMusic()
+    bgAudio.pause()
+    isPlayingAudio.value = false
   } else {
-    startSynthMusic()
+    playMusic()
   }
 }
 
+const handleUserGesture = () => {
+  if (!isPlayingAudio.value) {
+    playMusic()
+  }
+  removeGestureListeners()
+}
+
+const addGestureListeners = () => {
+  window.addEventListener('click', handleUserGesture, { once: true })
+  window.addEventListener('touchstart', handleUserGesture, { once: true })
+  window.addEventListener('scroll', handleUserGesture, { once: true })
+  window.addEventListener('keydown', handleUserGesture, { once: true })
+}
+
+const removeGestureListeners = () => {
+  window.removeEventListener('click', handleUserGesture)
+  window.removeEventListener('touchstart', handleUserGesture)
+  window.removeEventListener('scroll', handleUserGesture)
+  window.removeEventListener('keydown', handleUserGesture)
+}
+
+onMounted(() => {
+  initAudio()
+  // 1. Attempt immediate autoplay on page load
+  playMusic()
+
+  // 2. Fallback: enable on first touch, click, scroll or keypress if browser blocked immediate autoplay
+  addGestureListeners()
+})
+
 onUnmounted(() => {
-  stopSynthMusic()
-  if (audioCtx) audioCtx.close()
+  removeGestureListeners()
+  if (bgAudio) {
+    bgAudio.pause()
+    bgAudio = null
+  }
 })
 </script>
+
+
