@@ -1,6 +1,9 @@
 <template>
   <div class="min-h-screen bg-[#fff8f3] text-charcoal-900 font-sans relative selection:bg-terracotta-200 selection:text-terracotta-900">
     
+    <!-- Initial Paper Envelope Opening Overlay -->
+    <WelcomeOverlay @open="playMusic" />
+
     <!-- Floating Navigation Bar -->
     <Navbar 
       :isPlayingAudio="isPlayingAudio"
@@ -50,6 +53,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import WelcomeOverlay from './components/WelcomeOverlay.vue'
 import Navbar from './components/Navbar.vue'
 import HeroHeader from './components/HeroHeader.vue'
 import CeremonySection from './components/CeremonySection.vue'
@@ -61,6 +65,7 @@ import MusicSuggestionsSection from './components/MusicSuggestionsSection.vue'
 import RsvpSection from './components/RsvpSection.vue'
 import LocationModal from './components/LocationModal.vue'
 import FooterSection from './components/FooterSection.vue'
+
 
 const isLocationModalOpen = ref(false)
 const isPlayingAudio = ref(false)
