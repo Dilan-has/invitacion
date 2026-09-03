@@ -88,9 +88,9 @@
           <!-- Color 8: Beige -->
           <div class="group flex flex-col items-center transform hover:-translate-y-1.5 transition-all duration-300">
             <div class="relative w-20 h-20 sm:w-22 sm:h-22 rounded-full p-1 border-2 border-stone-300 group-hover:border-stone-500 shadow-md transition-all duration-300">
-              <div class="w-full h-full rounded-full bg-[#AFA082] shadow-inner"></div>
+              <div class="w-full h-full rounded-full bg-[#000000] shadow-inner"></div>
             </div>
-            <span class="mt-3 font-serif text-sm font-semibold text-charcoal-900">Beige</span>
+            <span class="mt-3 font-serif text-sm font-semibold text-charcoal-900">Negro</span>
           </div>
 
         </div>
